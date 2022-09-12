@@ -16,6 +16,10 @@ app.get("/ads", (req, res) => {
       id: 3,
       name: "Add 3",
     },
+    {
+      id: 4,
+      name: "Add 4",
+    },
   ]);
 });
 
