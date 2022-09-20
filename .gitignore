@@ -1,5 +1,14 @@
-# Created by https://www.toptal.com/developers/gitignore/api/node,visualstudiocode,react,dotenv
-# Edit at https://www.toptal.com/developers/gitignore?templates=node,visualstudiocode,react,dotenv
+# Created by https://www.toptal.com/developers/gitignore/api/dotenv,node,database,visualstudiocode
+# Edit at https://www.toptal.com/developers/gitignore?templates=dotenv,node,database,visualstudiocode
+
+### Database ###
+*.accdb
+*.db
+*.dbf
+*.mdb
+*.pdb
+*.sqlite
+*.sqlite3
 
 ### dotenv ###
 .env
@@ -143,19 +152,6 @@ dist
 # SvelteKit build / generate output
 .svelte-kit
 
-### react ###
-.DS_*
-**/*.backup.*
-**/*.back.*
-
-node_modules
-
-*.sublime*
-
-psd
-thumb
-sketch
-
 ### VisualStudioCode ###
 .vscode/*
 !.vscode/settings.json
@@ -181,4 +177,4 @@ sketch
 # Ignore code-workspaces
 *.code-workspace
 
-# End of https://www.toptal.com/developers/gitignore/api/node,visualstudiocode,react,dotenv
+# End of https://www.toptal.com/developers/gitignore/api/dotenv,node,database,visualstudiocode
