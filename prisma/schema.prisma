@@ -31,3 +31,9 @@ model Ad {
 
   game Game @relation(fields: [gameId], references: [id])
 }
+
+model TwitchAuth {
+  accessToken String @id @default(uuid())
+  expiresIn   Int
+  tokenType   String @default("Bearer")
+}
