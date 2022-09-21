@@ -9,6 +9,8 @@
 *.pdb
 *.sqlite
 *.sqlite3
+*.sqlite-journal
+*.sqlite3-journal
 
 ### dotenv ###
 .env
