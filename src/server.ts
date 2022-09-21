@@ -3,21 +3,14 @@ import express from "express";
 import { convertHoursStringToMinutes } from "./utils/convertHoursStringToMinutes";
 import { convertMinutesToHourString } from "./utils/convertMinutesToHourString";
 import cors from "cors";
+import { AdBody } from "./@types/AdBody";
+import { validateAd } from "./utils/validate";
+import { ZodError } from "zod";
 
 const app = express();
 const prisma = new PrismaClient();
 
 app.use(cors());
-
-interface AdBody {
-  name: string;
-  yearsPlaying: number;
-  discord: string;
-  weekDays: number[] | string[];
-  hoursStart: string;
-  hoursEnd: string;
-  useVoiceChannel: boolean;
-}
 
 app.use(express.json());
 
@@ -37,19 +30,29 @@ app.get("/games", async (request, response) => {
 app.post("/games/:id/ads", async (request, response) => {
   const gameId = request.params.id;
   const body: AdBody = request.body;
-  const ad = await prisma.ad.create({
-    data: {
-      gameId,
-      name: body.name,
-      weekDays: body.weekDays.join(","),
-      discord: body.discord,
-      hoursEnd: convertHoursStringToMinutes(body.hoursEnd),
-      hoursStart: convertHoursStringToMinutes(body.hoursStart),
-      useVoiceChannel: body.useVoiceChannel,
-      yearsPlaying: body.yearsPlaying,
-    },
-  });
-  return response.json(ad);
+
+  try {
+    const validatedAd = validateAd(body);
+    const ad = await prisma.ad.create({
+      data: {
+        gameId,
+        name: validatedAd.name,
+        weekDays: validatedAd.weekDays.join(","),
+        discord: validatedAd.discord,
+        hoursEnd: convertHoursStringToMinutes(validatedAd.hoursEnd),
+        hoursStart: convertHoursStringToMinutes(validatedAd.hoursStart),
+        useVoiceChannel: validatedAd.useVoiceChannel,
+        yearsPlaying: validatedAd.yearsPlaying,
+      },
+    });
+
+    return response.status(201).json(ad);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return response.status(400).json(error.issues);
+    }
+    return response.status(400).json(error);
+  }
 });
 
 app.get("/games/:id/ads", async (request, response) => {
