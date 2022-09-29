@@ -31,7 +31,7 @@ interface TopGamesData {
 app.get("/games", validAccessToken, async (_request, response) => {
   // top twitch games
   const twitchApiCall: AxiosResponse = await axiosInstance
-    .get("https://api.twitch.tv/helix/games/top")
+    .get("/games/top?first=12")
     .then((res) => res)
     .catch((error) => {
       console.log(error);
@@ -42,7 +42,7 @@ app.get("/games", validAccessToken, async (_request, response) => {
   // creates a array of game ids
   const gamesIds = topGames.data.reduce(
     (previousGame, currentGame) => [...previousGame, currentGame.id],
-    [topGames.data.shift()!.id]
+    [topGames.data[0]!.id]
   );
 
   // find games registered in db, get the ads counter
@@ -58,7 +58,6 @@ app.get("/games", validAccessToken, async (_request, response) => {
       },
     },
   });
-
   // put the ads counter in top games array
   const topGamesAndAds = topGames.data.map((game) => {
     const ads = games.find((gameInDb) => gameInDb.id === game.id);
