@@ -1,4 +1,3 @@
-import { PrismaClient } from "@prisma/client";
 import express from "express";
 import { convertHoursStringToMinutes } from "./utils/convertHoursStringToMinutes";
 import { convertMinutesToHourString } from "./utils/convertMinutesToHourString";
@@ -6,16 +5,51 @@ import cors from "cors";
 import { AdBody } from "./@types/AdBody";
 import { validateAd } from "./utils/validate";
 import { ZodError } from "zod";
+import prisma from "./global/prismaClient";
+import { validAccessToken } from "./middleware/validAccessToken";
+import { axiosInstance } from "./global/axios";
+import { AxiosResponse } from "axios";
 
 const app = express();
-const prisma = new PrismaClient();
-
 app.use(cors());
-
 app.use(express.json());
+app.use(validAccessToken);
 
-app.get("/games", async (request, response) => {
+interface TwitchGame {
+  id: string;
+  name: string;
+  box_art_url: string;
+  ads: number;
+}
+interface TopGamesData {
+  data: TwitchGame[];
+  pagination: {
+    cursor: string;
+  };
+}
+
+app.get("/games", validAccessToken, async (_request, response) => {
+  // top twitch games
+  const twitchApiCall: AxiosResponse = await axiosInstance
+    .get("https://api.twitch.tv/helix/games/top")
+    .then((res) => res)
+    .catch((error) => {
+      console.log(error);
+      return error;
+    });
+  const topGames: TopGamesData = twitchApiCall.data;
+
+  // creates a array of game ids
+  const gamesIds = topGames.data.reduce(
+    (previousGame, currentGame) => [...previousGame, currentGame.id],
+    [topGames.data.shift()!.id]
+  );
+
+  // find games registered in db, get the ads counter
   const games = await prisma.game.findMany({
+    where: {
+      id: { in: gamesIds },
+    },
     include: {
       _count: {
         select: {
@@ -24,7 +58,19 @@ app.get("/games", async (request, response) => {
       },
     },
   });
-  return response.json(games);
+
+  // put the ads counter in top games array
+  const topGamesAndAds = topGames.data.map((game) => {
+    const ads = games.find((gameInDb) => gameInDb.id === game.id);
+    if (ads) {
+      game.ads = ads._count.ads;
+    } else {
+      game.ads = 0;
+    }
+    return game;
+  });
+
+  return response.json(topGamesAndAds);
 });
 
 app.post("/games/:id/ads", async (request, response) => {
@@ -33,6 +79,16 @@ app.post("/games/:id/ads", async (request, response) => {
 
   try {
     const validatedAd = validateAd(body);
+    const gameInDb = await prisma.game.findUnique({ where: { id: gameId } });
+
+    if (gameInDb === null)
+      // register the game if it doesn't exist
+      await prisma.game.create({
+        data: {
+          id: gameId,
+        },
+      });
+
     const ad = await prisma.ad.create({
       data: {
         gameId,
@@ -57,6 +113,7 @@ app.post("/games/:id/ads", async (request, response) => {
 
 app.get("/games/:id/ads", async (request, response) => {
   const gameId: string = request.params.id;
+  // get all ads in db
   const ads = await prisma.ad.findMany({
     select: {
       id: true,
@@ -72,20 +129,22 @@ app.get("/games/:id/ads", async (request, response) => {
     },
     orderBy: { createdAt: "desc" },
   });
+
   return response.json(
     ads.map((ad) => {
       return {
         ...ad,
-        hoursEnd: convertMinutesToHourString(ad.hoursEnd),
-        hoursStart: convertMinutesToHourString(ad.hoursStart),
+        hoursEnd: convertMinutesToHourString(ad.hoursEnd), // hh:mm
+        hoursStart: convertMinutesToHourString(ad.hoursStart), // hh:mm
         weekDays: ad.weekDays.split(","),
       };
     })
   );
 });
 
-app.get("/ads/:id/discord", async (request, response) => {
+app.get("/ads/:id/discord", validAccessToken, async (request, response) => {
   const adId = request.params.id;
+  // find discord id in the ad
   const ad = await prisma.ad.findUniqueOrThrow({
     select: {
       discord: true,
