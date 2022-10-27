@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AdBody } from "../@types/AdBody";
+import { AdBody } from "../types/AdBody";
 
 function validateStringHours(hourInString: string) {
   if (!hourInString.includes(":"))
