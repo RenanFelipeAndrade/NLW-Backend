@@ -9,6 +9,7 @@ import prisma from "./global/prismaClient";
 import { validAccessToken } from "./middleware/validAccessToken";
 import { axiosInstance } from "./global/axios";
 import { AxiosResponse } from "axios";
+import { validateUser } from "./utils/validateUser";
 
 const app = express();
 app.use(cors());
@@ -155,6 +156,28 @@ app.get("/ads/:id/discord", validAccessToken, async (request, response) => {
   return response.json({
     discord: ad.discord,
   });
+});
+
+app.post("/users", async (request, response) => {
+  const userInfo = request.body;
+  try {
+    const validUser = validateUser(userInfo);
+    const user = await prisma.discordUser.create({
+      data: {
+        id: validUser.id,
+        name: validUser.name,
+        username: validUser.username,
+        email: validUser.email,
+        image: validUser.image,
+      },
+    });
+    return response.status(201).json(user);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return response.status(400).json(error.issues);
+    }
+    return response.status(400).json(error);
+  }
 });
 
 app.listen(8000);
