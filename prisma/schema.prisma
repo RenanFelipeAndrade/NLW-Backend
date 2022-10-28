@@ -35,3 +35,11 @@ model TwitchAuth {
   expiresIn   Int
   tokenType   String @default("Bearer")
 }
+
+model DiscordUser {
+  id       String @id
+  name     String
+  username String
+  email    String
+  image    String
+}
