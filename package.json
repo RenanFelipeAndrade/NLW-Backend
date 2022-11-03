@@ -2,8 +2,9 @@
   "name": "nlw",
   "version": "1.0.0",
   "description": "",
-  "main": "src/server.mjs",
+  "main": "src/server.js",
   "scripts": {
+    "start": "node ./src/server.js",
     "build": "tsc",
     "dev": "tsnd --exit-child ./src/server.ts"
   },
