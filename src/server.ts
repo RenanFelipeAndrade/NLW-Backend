@@ -10,6 +10,7 @@ import { validAccessToken } from "./middleware/validAccessToken";
 import { axiosInstance } from "./global/axios";
 import { AxiosResponse } from "axios";
 import { validateUser } from "./utils/validateUser";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 
 const app = express();
 app.use(cors());
@@ -173,10 +174,16 @@ app.post("/users", async (request, response) => {
     });
     return response.status(201).json(user);
   } catch (error) {
+    if (
+      error instanceof PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return response.status(409).send({ message: "User already exists" });
+    }
     if (error instanceof ZodError) {
       return response.status(400).json(error.issues);
     }
-    return response.status(400).json(error);
+    return response.status(500).json(error);
   }
 });
 
