@@ -11,6 +11,7 @@ import { axiosInstance } from "./global/axios";
 import { AxiosResponse } from "axios";
 import { validateUser } from "./utils/validateUser";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
+import { DiscordUser } from "@prisma/client";
 
 const app = express();
 app.use(cors());
@@ -160,7 +161,7 @@ app.get("/ads/:id/discord", validAccessToken, async (request, response) => {
 });
 
 app.post("/users", async (request, response) => {
-  const userInfo = request.body;
+  const userInfo: DiscordUser = request.body;
   try {
     const validUser = validateUser(userInfo);
     const user = await prisma.discordUser.create({
@@ -178,7 +179,10 @@ app.post("/users", async (request, response) => {
       error instanceof PrismaClientKnownRequestError &&
       error.code === "P2002"
     ) {
-      return response.status(409).send({ message: "User already exists" });
+      const user = await prisma.discordUser.findUnique({
+        where: { id: userInfo.id },
+      });
+      return response.status(200).json(user);
     }
     if (error instanceof ZodError) {
       return response.status(400).json(error.issues);
