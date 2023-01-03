@@ -44,10 +44,10 @@ export async function validAccessToken(
     const tokenInDb = await prisma.twitchAuth.findFirst({});
     const isTokenExpired = tokenInDb !== null && tokenInDb.expiresIn === 0;
 
-    if (!isTokenExpired) {
+    if (!isTokenExpired && tokenInDb) {
       axiosInstance.defaults.headers.common = {
         // unecessary optional chainning
-        Authorization: `Bearer ${tokenInDb?.accessToken}`,
+        Authorization: `Bearer ${tokenInDb.accessToken}`,
         "Client-Id": clientId ? clientId : false,
       };
       next();
