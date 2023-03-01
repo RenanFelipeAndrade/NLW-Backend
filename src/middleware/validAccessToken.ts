@@ -18,11 +18,7 @@ async function getTokenFromApi() {
       client_secret: clientSecret,
       grant_type: "client_credentials",
     })
-    .then((response) => response)
-    .catch((error) => {
-      console.log(error);
-      return error;
-    });
+    .then((response) => response);
 }
 
 async function saveTokenInDb(token: Token) {
@@ -42,7 +38,8 @@ export async function validAccessToken(
 ) {
   try {
     const tokenInDb = await prisma.twitchAuth.findFirst({});
-    const isTokenExpired = tokenInDb !== null && tokenInDb.expiresIn === 0;
+    const isTokenExpired =
+      tokenInDb !== null && tokenInDb.expiresIn < Math.floor(Date.now() / 1000);
 
     if (!isTokenExpired && tokenInDb) {
       axiosInstance.defaults.headers.common = {
