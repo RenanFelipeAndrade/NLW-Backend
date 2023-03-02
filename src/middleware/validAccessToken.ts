@@ -1,3 +1,4 @@
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import { NextFunction } from "express";
 import { axiosInstance } from "../global/axios";
 import prisma from "../global/prismaClient";
@@ -51,7 +52,20 @@ export async function validAccessToken(
       return;
     }
 
-    if (isTokenExpired) await prisma.twitchAuth.deleteMany();
+    if (isTokenExpired)
+      await prisma.twitchAuth
+        .delete({
+          where: { accessToken: tokenInDb.accessToken },
+        })
+        .catch((error: unknown) => {
+          if (
+            error! instanceof PrismaClientKnownRequestError &&
+            // if token does not exist in db
+            error.code !== "P2025"
+          ) {
+            console.log(error);
+          }
+        });
 
     const response = await getTokenFromApi();
     const token = await saveTokenInDb(response.data);
