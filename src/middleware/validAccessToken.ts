@@ -1,5 +1,5 @@
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
-import { NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import { axiosInstance } from "../global/axios";
 import prisma from "../global/prismaClient";
 
@@ -33,8 +33,8 @@ async function saveTokenInDb(token: Token) {
 }
 
 export async function validAccessToken(
-  request: Express.Request,
-  response: Express.Response,
+  _request: Request,
+  response: Response,
   next: NextFunction
 ) {
   try {
@@ -78,6 +78,8 @@ export async function validAccessToken(
     next();
   } catch (error) {
     console.log(error);
-    return null;
+    return response
+      .status(500)
+      .send("It was not possible to communicate with Twitch");
   }
 }
