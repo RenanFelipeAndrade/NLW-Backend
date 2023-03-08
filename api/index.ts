@@ -1,15 +1,15 @@
 import express from "express";
-import { convertHoursStringToMinutes } from "./utils/convertHoursStringToMinutes";
-import { convertMinutesToHourString } from "./utils/convertMinutesToHourString";
+import { convertHoursStringToMinutes } from "../src/utils/convertHoursStringToMinutes";
+import { convertMinutesToHourString } from "../src/utils/convertMinutesToHourString";
 import cors from "cors";
-import { AdBody } from "./types/AdBody";
-import { validateAd } from "./utils/validateAd";
+import { AdBody } from "../src/types/AdBody";
+import { validateAd } from "../src/utils/validateAd";
 import { ZodError } from "zod";
-import prisma from "./global/prismaClient";
-import { validAccessToken } from "./middleware/validAccessToken";
-import { axiosInstance } from "./global/axios";
+import prisma from "../src/global/prismaClient";
+import { validAccessToken } from "../src/middleware/validAccessToken";
+import { axiosInstance } from "../src/global/axios";
 import { AxiosResponse } from "axios";
-import { validateUser } from "./utils/validateUser";
+import { validateUser } from "../src/utils/validateUser";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import { DiscordUser } from "@prisma/client";
 

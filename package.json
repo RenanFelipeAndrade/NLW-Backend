@@ -6,7 +6,11 @@
   "scripts": {
     "start": "node ./src/server.js",
     "build": "tsc",
-    "dev": "tsnd --exit-child ./src/server.ts"
+    "vercel-build": "prisma generate && prisma migrate deploy && tsc",
+    "dev": "prisma generate && prisma migrate deploy && tsnd --exit-child ./api/index.ts"
+  },
+  "prisma": {
+    "schema": "./prisma/schema.prisma"
   },
   "keywords": [],
   "author": "",

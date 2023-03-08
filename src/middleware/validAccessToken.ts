@@ -78,8 +78,9 @@ export async function validAccessToken(
     next();
   } catch (error) {
     console.log(error);
-    return response
-      .status(500)
-      .send("It was not possible to communicate with Twitch");
+    return response.status(500).json({
+      message: "It was not possible to communicate with Twitch",
+      error: error,
+    });
   }
 }
