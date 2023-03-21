@@ -81,6 +81,13 @@ app.post("/games/:id/ads", async (request, response) => {
 
   try {
     const validatedAd = validateAd(body);
+    const isUserRegistered = await prisma.discordUser.findUnique({
+      where: { id: validatedAd.discord },
+    });
+
+    if (!isUserRegistered)
+      return response.status(400).send("The discord user does not exist");
+
     const gameInDb = await prisma.game.findUnique({ where: { id: gameId } });
 
     if (gameInDb === null)
@@ -108,6 +115,11 @@ app.post("/games/:id/ads", async (request, response) => {
   } catch (error) {
     if (error instanceof ZodError) {
       return response.status(400).json(error.issues);
+    }
+    if (error instanceof PrismaClientKnownRequestError) {
+      return response
+        .status(400)
+        .json({ message: error.message, name: error.name, code: error.code });
     }
     return response.status(400).json(error);
   }
