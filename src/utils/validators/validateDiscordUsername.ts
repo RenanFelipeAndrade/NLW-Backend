@@ -1,14 +1,25 @@
-export function validateDiscordUsername(discord: string) {
-  if (!discord.includes("#"))
-    throw { message: "Insert a valid discord username. Missing a #" };
-
-  const discordParts = discord.split("#");
-  const userNumber = discordParts[1].split("").map(Number);
-
-  if (userNumber.length !== 4 || userNumber.includes(NaN))
+export const validateDiscordUsername = async (username: string) => {
+  // Check length requirement
+  if (username.length < 2 || username.length > 32) {
     throw {
-      message: "Insert a discord username. The digits are invalid",
+      message: "Invalid username length",
     };
+  }
 
-  return discord;
-}
+  // Check for invalid characters
+  const allowedCharactersRegex = /^[a-z0-9_.]+$/;
+  if (!allowedCharactersRegex.test(username)) {
+    throw {
+      message: "Only a to z, 0 to 9, underscore and periods are allowed",
+    };
+  }
+
+  // Check for consecutive periods
+  if (username.includes("..")) {
+    throw {
+      message: "Usernames are not allowed to have consecutive periods",
+    };
+  }
+
+  return username;
+};
