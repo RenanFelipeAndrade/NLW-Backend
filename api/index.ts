@@ -85,7 +85,7 @@ app.post("/games/:id/ads", async (request, response) => {
   try {
     const validatedAd = validateAd(body);
     const isUserRegistered = await prisma.discordUser.findUnique({
-      where: { id: validatedAd.discord },
+      where: { username: validatedAd.discord },
     });
 
     if (!isUserRegistered)

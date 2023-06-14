@@ -39,7 +39,7 @@ model TwitchAuth {
 model DiscordUser {
   id       String @id
   name     String
-  username String
-  email    String
+  username String @unique
+  email    String @unique
   image    String
 }
