@@ -1,4 +1,4 @@
-export const validateDiscordUsername = async (username: string) => {
+export const validateDiscordUsername = (username: string) => {
   // Check length requirement
   if (username.length < 2 || username.length > 32) {
     throw {

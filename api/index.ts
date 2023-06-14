@@ -42,10 +42,13 @@ app.get("/games", validAccessToken, async (_request, response) => {
     });
   const topGames: TopGamesData = twitchApiCall.data;
 
+  if (topGames.data.length === 0)
+    return response.status(400).send("No games were available");
+
   // creates a array of game ids
   const gamesIds = topGames.data.reduce(
     (previousGame, currentGame) => [...previousGame, currentGame.id],
-    [topGames.data[0]!.id]
+    [topGames.data[0].id]
   );
 
   // find games registered in db, get the ads counter
