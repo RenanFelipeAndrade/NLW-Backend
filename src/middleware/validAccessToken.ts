@@ -1,4 +1,4 @@
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { NextFunction, Request, Response } from "express";
 import { axiosInstance } from "../global/axios";
 import prisma from "../global/prismaClient";
@@ -59,7 +59,7 @@ export async function validAccessToken(
         })
         .catch((error: unknown) => {
           if (
-            error! instanceof PrismaClientKnownRequestError &&
+            error instanceof PrismaClientKnownRequestError &&
             // if token does not exist in db
             error.code !== "P2025"
           ) {
@@ -70,7 +70,6 @@ export async function validAccessToken(
     const response = await getTokenFromApi();
     const token = await saveTokenInDb(response.data);
     axiosInstance.defaults.headers.common = {
-      // unecessary optional chainning
       Authorization: `Bearer ${token.accessToken}`,
       "Client-Id": clientId ? clientId : false,
     };

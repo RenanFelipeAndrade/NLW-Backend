@@ -10,7 +10,7 @@ import { validAccessToken } from "../src/middleware/validAccessToken";
 import { axiosInstance } from "../src/global/axios";
 import { AxiosResponse } from "axios";
 import { validateUser } from "../src/utils/validateUser";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { DiscordUser } from "@prisma/client";
 
 const app = express();
@@ -202,6 +202,7 @@ app.post("/users", async (request, response) => {
     if (error instanceof ZodError) {
       return response.status(400).json(error.issues);
     }
+    console.log(error);
     return response.status(500).json(error);
   }
 });
